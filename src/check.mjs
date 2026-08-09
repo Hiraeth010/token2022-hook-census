@@ -45,7 +45,8 @@ import { fileURLToPath } from 'node:url';
 import { getAccountInfo } from './rpc.mjs';
 import {
   parseMintExtensions, findExtension, parseTransferHook,
-  EXT_TRANSFER_HOOK, TOKEN_2022_PROGRAM,
+  parseUpgradeableProgram, parseProgramData,
+  EXT_TRANSFER_HOOK, TOKEN_2022_PROGRAM, BPF_UPGRADEABLE_LOADER,
 } from './tlv.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -185,6 +186,42 @@ if (!live) {
   if (parsed.truncated) {
     console.log('\n  WARNING: the TLV region is truncated, so the extension list below is incomplete.');
   }
+
+  // Resolve program upgradeability in LIVE mode too.
+  //
+  // ADDED 2026-08-09. The dataset path printed "hook program is UPGRADEABLE —
+  // <authority> can replace its logic"; the live path never set the field, so
+  // the guard below silently skipped and the line vanished entirely. Meanwhile
+  // this tool's own help says "To actually find out: --live". `--live` returned
+  // a strictly WEAKER answer on the single most consequential fact for a
+  // holder: whether the code running on their transfers can be swapped.
+  //
+  // Silently omitting a line is worse than printing UNKNOWN, because absence
+  // reads as "nothing to report". So it is resolved properly — two extra
+  // account reads — and if that fails it says so out loud.
+  if (row.hookProgramId) {
+    const prog = await getAccountInfo(row.hookProgramId);
+    if (!prog?.value) {
+      row.hookProgramUpgradeable = null;
+      row.hookProgramNote = 'the hook program account could not be read';
+    } else if (prog.value.owner !== BPF_UPGRADEABLE_LOADER) {
+      row.hookProgramUpgradeable = false;
+      row.hookProgramNote = `loader ${prog.value.owner} — not the upgradeable loader`;
+    } else {
+      const p = parseUpgradeableProgram(Buffer.from(prog.value.data[0], 'base64'));
+      const pdAddr = p?.programDataAddress?.toString?.() ?? p?.programDataAddress ?? null;
+      const pd = pdAddr ? await getAccountInfo(pdAddr) : null;
+      if (!pd?.value) {
+        row.hookProgramUpgradeable = null;
+        row.hookProgramNote = 'programdata account could not be read';
+      } else {
+        const d = parseProgramData(Buffer.from(pd.value.data[0], 'base64'));
+        const auth = d?.upgradeAuthority?.toString?.() ?? d?.upgradeAuthority ?? null;
+        row.hookProgramUpgradeable = Boolean(auth);
+        row.hookProgramUpgradeAuthority = auth;
+      }
+    }
+  }
   source = `live RPC read at slot ${info.slot}`;
   if (!hookEntry) {
     console.log(`\n  ${mint}\n`);
@@ -204,11 +241,14 @@ if (row.name || row.symbol) say('token', `${row.name ?? '?'}${row.symbol ? ` (${
 say('transfer hook', attached ? 'ATTACHED — code runs on every transfer' : 'slot present, program_id is null — no code runs today');
 if (attached) {
   say('hook program', row.hookProgramId);
-  if (row.hookProgramUpgradeable !== undefined) {
-    say('hook program is', row.hookProgramUpgradeable
-      ? `UPGRADEABLE — ${row.hookProgramUpgradeAuthority ?? 'an authority'} can replace its logic`
-      : 'immutable');
-  }
+  // Never silently omitted. `undefined` used to skip this line entirely in live
+  // mode, and an absent line reads as "nothing to report" on the fact that
+  // decides whether the code running on a holder's transfers can be swapped.
+  say('hook program is', row.hookProgramUpgradeable === true
+    ? `UPGRADEABLE — ${row.hookProgramUpgradeAuthority ?? 'an authority'} can replace its logic`
+    : row.hookProgramUpgradeable === false
+      ? `immutable${row.hookProgramNote ? ` (${row.hookProgramNote})` : ''}`
+      : `UNKNOWN — could not be resolved${row.hookProgramNote ? ` (${row.hookProgramNote})` : ''}`);
 }
 say('hook authority', row.hookAuthority ?? 'none — the slot can never be filled');
 say('can it be repointed', canRepoint
