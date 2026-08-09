@@ -9,7 +9,7 @@
  *   upgradeable: null   NOT MEASURED — render as `not covered`, never as safe
  */
 
-import { getAccountInfo, getProgramAccountsOrThrow } from '../chain.mjs';
+import { getAccountInfo, getProgramAccountsOrThrow } from './rpc.mjs';
 import { extraAccountMetasPda, metaplexMetadataPda, METAPLEX_METADATA_PROGRAM } from './crypto.mjs';
 import {
   parseTokenMetadata, parseMetadataPointer, parseMetaplexMetadata,
