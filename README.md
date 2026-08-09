@@ -45,8 +45,23 @@ exists, and **as far as we could find, nobody had assembled it.**
 
 ## Reproduce it
 
+> **Corrected 2026-08-09.** This section previously said `node src/cli.mjs scan --out ./out`.
+> There is no `scan` subcommand — that command exits 2 with `unknown argument: scan`. Worse,
+> nobody could reach far enough to find out, because `src/enrich.mjs`, `src/enumerate.mjs` and
+> `src/scan.mjs` imported `../chain.mjs` from the project that produced this dataset, and that
+> file was never part of the publication. A fresh clone died on `ERR_MODULE_NOT_FOUND`, and
+> `src/enumerate.test.mjs` never loaded at all.
+>
+> A repository whose whole claim is *recompute it, do not take our word for it* shipped with a
+> front door that did not open. It was found by an outside reviewer running the command rather
+> than reading it, which is the only way that kind of defect is ever found.
+>
+> Fixed by moving the RPC client into this repository (`src/rpc.mjs`) so it depends on nothing
+> outside the clone. Verified by copying `src/` into an empty directory: 67/67 tests pass, and
+> the command below reaches mainnet, verifies the seed candidates and starts the census.
+
 ```
-node src/cli.mjs scan --out ./out
+node src/cli.mjs --out ./out
 ```
 
 Every row re-derives from `getAccountInfo` on a public endpoint. `METHOD.md` gives the byte-level
