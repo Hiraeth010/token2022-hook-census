@@ -89,7 +89,7 @@ block transfers. If you came here about the hook, that line is the more urgent o
 > than reading it, which is the only way that kind of defect is ever found.
 >
 > Fixed by moving the RPC client into this repository (`src/rpc.mjs`) so it depends on nothing
-> outside the clone. Verified by copying `src/` into an empty directory: 67/67 tests pass, and
+> outside the clone. Verified by copying `src/` into an empty directory: 76/76 tests pass, and
 > the command below reaches mainnet, verifies the seed candidates and starts the census.
 
 ```
