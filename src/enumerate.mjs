@@ -28,7 +28,7 @@
 import {
   getMultipleAccounts, getProgramAccountsOrThrow, getSignaturesForAddress,
   rpc, RpcError,
-} from '../chain.mjs';
+} from './rpc.mjs';
 import { b58encode } from './crypto.mjs';
 import {
   parseMintExtensions, parseTransferHook, parseMintBase,
