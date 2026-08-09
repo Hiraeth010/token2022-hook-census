@@ -86,6 +86,34 @@ test('every answer names the source it came from', () => {
   }
 });
 
+test('a malformed address is distinguished from an unmeasured one', () => {
+  // Both used to print NOT MEASURED and exit 3, so a typo'd mint was
+  // indistinguishable from a mint that genuinely had not been looked at.
+  // Someone chasing a scam token is exactly the person who pastes a mangled
+  // address, and telling them "not measured" sends them looking for the wrong
+  // thing.
+  const bad = run(['not-a-mint-!!!']);
+  assert.equal(bad.code, 2, 'malformed input is a different failure from unmeasured');
+  assert.match(bad.out, /not a valid base58 Solana address/);
+  assert.doesNotMatch(bad.out, /NOT MEASURED/);
+
+  // 0, O, I and l are not in the base58 alphabet — the classic paste corruption.
+  assert.equal(run(['0OIl' + 'A'.repeat(40)]).code, 2);
+
+  // And a well-formed address that simply is not in the dataset is unchanged.
+  assert.equal(run([NOT_IN_DATASET]).code, 3);
+});
+
+test('a dated snapshot says so on the confident path, not only when it misses', () => {
+  // A hook authority can be repointed silently, so a snapshot is a claim about
+  // the past wearing the clothes of the present. The not-in-dataset path already
+  // nudged toward --live; without this the CONFIDENT-looking answer was the one
+  // that went quietly stale.
+  const { out } = run([ONDO]);
+  assert.match(out, /STALE:\s+this snapshot is \d+ day\(s\) old/);
+  assert.match(out, /Re-check with --live/);
+});
+
 test('no argument exits non-zero with usage', () => {
   const { code, out } = run([]);
   assert.equal(code, 2);
