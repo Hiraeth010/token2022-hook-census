@@ -2,14 +2,19 @@
 /**
  * cli.mjs — one-command reproduction.
  *
- *   node src/census/cli.mjs [--max-transactions N] [--max-signatures N]
- *                           [--frontier-rounds N] [--holders] [--out DIR]
+ *   in this repository:      node src/census/cli.mjs [options]
+ *   in the published census: node src/cli.mjs [options]
+ *
+ * There is NO subcommand. `cli.mjs scan` exits 2 with "unknown argument", and
+ * the published README said exactly that for a while — behind a missing-module
+ * error that stopped anyone reaching it.
  *
  * Reads the endpoint from SOLANA_RPC_URL. Never takes a key on the command line, so the
  * key cannot end up in shell history or in a process listing shared over a screen.
  */
 
 import { mkdir, writeFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -19,6 +24,26 @@ import { renderCensusMarkdown } from './render.mjs';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OPS_ROOT = join(HERE, '..', '..');
 
+/**
+ * Where results go when `--out` is not given.
+ *
+ * FIXED 2026-08-09. This was unconditionally `OPS_ROOT/data/census`, which is
+ * correct inside the project tree and wrong everywhere else: in the published
+ * standalone repository, `src/` sits at the root, so that path resolves to
+ * `<clone>/../../data/census` — OUTSIDE the clone, in whatever directory the
+ * user happened to put it next to. A tool published for strangers to run should
+ * not write above the directory they cloned into.
+ *
+ * The detection is deliberately a filesystem fact rather than an environment
+ * variable or a build flag, so the same file behaves correctly in both places
+ * with nothing to configure and nothing to forget.
+ */
+const IN_PROJECT_TREE = existsSync(join(OPS_ROOT, 'data'));
+const DEFAULT_OUT = IN_PROJECT_TREE ? join(OPS_ROOT, 'data', 'census') : join(process.cwd(), 'out');
+
+/** How this file is actually invoked, so the usage text is right in both trees. */
+const SELF = IN_PROJECT_TREE ? 'src/census/cli.mjs' : 'src/cli.mjs';
+
 function parseArgs(argv) {
   const args = {
     maxTransactions: 150,
@@ -27,7 +52,7 @@ function parseArgs(argv) {
     includeHolders: false,
     refreshSignatures: false,
     useJupiter: true,
-    outDir: join(OPS_ROOT, 'data', 'census'),
+    outDir: DEFAULT_OUT,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -40,7 +65,7 @@ function parseArgs(argv) {
     else if (a === '--no-jupiter') args.useJupiter = false;
     else if (a === '--out') args.outDir = next();
     else if (a === '--help' || a === '-h') {
-      console.log(`Usage: node src/census/cli.mjs [options]
+      console.log(`Usage: node ${SELF} [options]
 
   --max-transactions N   transactions fetched per sampling root (default 150)
   --max-signatures N     signatures pulled per sampling root (default 1000)
@@ -49,7 +74,11 @@ function parseArgs(argv) {
   --refresh-signatures   re-fetch signature pages instead of reusing the cached
                          window (a cached window is what makes a run reproducible)
   --no-jupiter           skip the Jupiter verified-list candidate source (RPC only)
-  --out DIR              output directory (default ops/data/census)
+  --out DIR              output directory (default: ${DEFAULT_OUT})
+
+There is no subcommand. This is the whole interface: "cli.mjs scan" is not a
+thing and exits 2. If you read that somewhere, it was our documentation being
+wrong — a defect we would rather you reported than worked around.
 
 Environment:
   SOLANA_RPC_URL         RPC endpoint. Falls back to the public mainnet endpoint,
