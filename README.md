@@ -43,6 +43,38 @@ exists, and **as far as we could find, nobody had assembled it.**
 
 ---
 
+## Look up one token
+
+```
+node src/check.mjs <mint>
+node src/check.mjs <mint> --live     # re-derive from RPC instead of the dataset
+```
+
+It answers one question — **can code be attached to transfers of this token, and who
+decides** — and refuses to answer any other. Example, Ondo's USDon:
+
+```
+  transfer hook        slot present, program_id is null — no code runs today
+  hook authority       9foMHsSDq7nMg4WPusSz9eY7tyxyukqborA8GyU5cUxD
+  can it be repointed  YES — can attach or replace code at any time, with no
+                       reissuance, no migration, and no signal to holders
+  other enforcement    PermanentDelegate, Pausable, DefaultAccountState, ...
+```
+
+Two things it will not do:
+
+- **It never says "safe".** Every line describes on-chain *configuration*, never
+  anyone's intent. Reserving a hook slot is common and often benign.
+- **A mint that is not in the dataset is reported as `NOT MEASURED`, never as
+  "no hook"**, and exits 3. This census is complete with respect to a named
+  population, not with respect to the chain — see `ENUMERATION-LIMIT.md`. Printing
+  a clean bill of health for something never looked at is the most damaging thing
+  this tool could do, and there is a test asserting it does not.
+
+It also surfaces the extensions that act **today**. An empty hook slot is dormant;
+a `PermanentDelegate` can already move a holder's tokens and `Pausable` can already
+block transfers. If you came here about the hook, that line is the more urgent one.
+
 ## Reproduce it
 
 > **Corrected 2026-08-09.** This section previously said `node src/cli.mjs scan --out ./out`.
