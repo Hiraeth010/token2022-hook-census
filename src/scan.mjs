@@ -8,7 +8,7 @@
  */
 
 import { readFile } from 'node:fs/promises';
-import { getSlot, rpcUrl } from '../chain.mjs';
+import { getSlot, rpcUrl } from './rpc.mjs';
 import { Cache, ScanState } from './cache.mjs';
 import {
   probeGpa, gpaFullMintScan, gpaOffsetSweep, checkCandidates,
