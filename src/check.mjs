@@ -99,6 +99,7 @@ const say = (k, v) => out.push([k, v]);
 async function main() {
 let row = null;
 let source = null;
+let staleNote = null;
 
 if (!live) {
   const census = loadCensus();
@@ -106,8 +107,32 @@ if (!live) {
     console.error('census.json not found. Run the scan first, or pass --live to query RPC directly.');
     process.exitCode = 2; return;
   }
+  // Validate the address SHAPE before looking it up. Without this, a typo'd or
+  // truncated mint is indistinguishable from a genuinely unmeasured one: both
+  // print NOT MEASURED and exit 3. That is not dangerous — it never implies a
+  // clean bill of health — but it is the confusing failure, and someone chasing
+  // a scam token is exactly the person who will paste a mangled address.
+  // The `--live` path already rejects these; the dataset path did not.
+  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(mint)) {
+    console.error(`\n  "${mint}" is not a valid base58 Solana address.`);
+    console.error('  This is a malformed input, NOT a mint that went unmeasured — check for a typo,');
+    console.error('  a truncated paste, or a 0/O/I/l substitution.\n');
+    process.exitCode = 2; return;
+  }
+
   row = census.data.rows.find((r) => r.mint === mint);
   source = `${census.path} (observed ${census.data.generatedAt ?? 'unknown'})`;
+
+  // A hook authority can be repointed silently at any moment, so a dated snapshot
+  // is a claim about the past wearing the clothes of the present. The
+  // not-in-dataset path already nudges toward --live; omitting it here left the
+  // CONFIDENT-looking path as the one that goes quietly stale.
+  const observedAt = Date.parse(census.data.generatedAt ?? '');
+  if (Number.isFinite(observedAt)) {
+    const ageDays = (Date.now() - observedAt) / 86_400_000;
+    if (ageDays >= 1) staleNote = `this snapshot is ${Math.floor(ageDays)} day(s) old; `
+      + 'a hook authority can be repointed with no reissuance and no signal to holders. Re-check with --live.';
+  }
 
   if (!row) {
     console.log(`\n  ${mint}\n`);
@@ -208,6 +233,7 @@ if (enforcement.length) {
 console.log('  This describes on-chain configuration, not anyone\'s intent, and it is not a');
 console.log('  safety rating. Reserving a hook slot is common and often benign.');
 console.log(`  source: ${source}`);
+if (staleNote) console.log(`  STALE:  ${staleNote}`);
 console.log('');
 }
 
