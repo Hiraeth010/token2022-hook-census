@@ -1,0 +1,168 @@
+{
+  "_comment": "Candidate addresses for the seed-verify method (D) and the starting frontier for the transaction-sampling crawl (C). Nothing in this file is asserted to be true. Every entry is a CANDIDATE that the scanner independently verifies against mainnet RPC; candidates that turn out not to exist, not to be Token-2022, or not to carry a TransferHook are dropped and never appear in the census. Sources are recorded so a reviewer can judge selection bias.",
+  "_bias_warning": "This list is not a sample of anything. It is whatever a small manual search turned up. Findings derived from it may not be generalised to the mainnet population.",
+
+  "candidateMints": [
+    {
+      "address": "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo",
+      "note": "PayPal USD (PYUSD). Widely documented as a Token-2022 mint.",
+      "source": "well-known Token-2022 mint"
+    },
+    {
+      "address": "CKfatsPMUf8SkiURsDXs7eK6GWb4Jsd6UDbs7twMCWxo",
+      "note": "BonkEarn. Cited in a web search result as a mainnet Token-2022 transfer-hook example; included so the claim gets checked rather than repeated.",
+      "source": "web search claim, unverified at time of listing"
+    },
+    {
+      "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "note": "USDC. Legacy SPL Token, included as a negative control — the scanner must reject it.",
+      "source": "negative control"
+    },
+    {
+      "address": "HW8cwBUHhciAuZjuetEvhJ1JcrFzZDSLbhPXSj9pump",
+      "note": "$HUKT, the token of a site advertising itself as a Token-2022 transfer-hook framework. Included because the association invites the assumption that it carries a hook; the scan is what decides.",
+      "source": "hukt.fun, claim unverified at time of listing"
+    },
+    {
+      "address": "HuKtYardRai1C1assif9Trackz7mNpQrStVwXbCdEfGh",
+      "note": "Listed by hukt.fun as its demonstration mint. Retained deliberately: a reproduction run should observe that this account does not exist on mainnet, which is itself the check working.",
+      "source": "hukt.fun, claim unverified at time of listing"
+    },
+
+    {
+      "address": "CASHx9KJUStyftLFWGvEVf59SGeG9sh5FfcnZMVPCASH",
+      "note": "Confirmed to carry a TransferHook extension. Promoted to a seed so coverage is monotonic across runs — transaction sampling walks a different window each time and would otherwise drop it.",
+      "source": "discovered by tx-sample on 2026-08-08, Token-2022 root, slots 437963343-437963350"
+    },
+    {
+      "address": "ENL66PGy8d8j5KNqLtCcg4uidDUac5ibt45wbjH9REzB",
+      "note": "Confirmed to carry a TransferHook extension. Promoted to a seed for the same reason.",
+      "source": "discovered by tx-sample on 2026-08-08, Token-2022 root, slots 437963343-437963350"
+    },
+    {
+      "address": "Xs8S1uUs1zvS2p7iwtsG3b6fkhpvmwz4GYU3gWAmWHZ",
+      "note": "Confirmed to carry a TransferHook extension. Promoted to a seed for the same reason.",
+      "source": "discovered by tx-sample on 2026-08-08, Token-2022 root, slots 437963343-437963350"
+    },
+    {
+      "address": "XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W",
+      "note": "Confirmed to carry a TransferHook extension. Promoted to a seed for the same reason.",
+      "source": "discovered by tx-sample on 2026-08-08, Token-2022 root, slots 437963343-437963350"
+    },
+    {
+      "address": "XsqE9cRRpzxcGKDXj1BJ7Xmg4GRhZoyY1KpmGSxAWT2",
+      "note": "Confirmed to carry a TransferHook extension. Promoted to a seed for the same reason.",
+      "source": "discovered by tx-sample on 2026-08-08, Token-2022 root, slots 437963343-437963350"
+    },
+
+    {
+      "address": "Xsv9hRk1z5ystj9MhnA7Lq4vjSsLwzL2nxrwmwtD3re",
+      "note": "Further xStocks-family mint. Sampling found three siblings carrying hooks, so the rest of the family is worth testing explicitly rather than waiting for them to appear in a sampled window.",
+      "source": "address list in a local unrelated codebase (D:\\chaser\\lib\\etf.ts), unverified at time of listing"
+    },
+    {
+      "address": "XsueG8BtpquVJX9LVLLEGuViXUungE6WmK5YZ3p3bd1",
+      "note": "Further xStocks-family mint, same rationale.",
+      "source": "address list in a local unrelated codebase (D:\\chaser\\lib\\etf.ts), unverified at time of listing"
+    },
+    {
+      "address": "Xs7ZdzSHLU9ftNJsii5fCeJhoRWSC32SQGzGQtePxNu",
+      "note": "Further xStocks-family mint, same rationale.",
+      "source": "address list in a local unrelated codebase (D:\\chaser\\lib\\etf.ts), unverified at time of listing"
+    },
+    {
+      "address": "Xs3eBt7uRfJX8QUs4suhyU8p2M6DoUDrJyWBa8LLZsg",
+      "note": "Further xStocks-family mint, same rationale.",
+      "source": "address list in a local unrelated codebase (D:\\chaser\\lib\\etf.ts), unverified at time of listing"
+    },
+    {
+      "address": "XsbEhLAtcf6HdfpFZ5xEMdqW8nfAvcsP5bdudRLJzJp",
+      "note": "Further xStocks-family mint, same rationale.",
+      "source": "address list in a local unrelated codebase (D:\\chaser\\lib\\etf.ts), unverified at time of listing"
+    },
+
+    {
+      "address": "FRAGSEthVFL7fdqM8hxfxkfCZzUvmg21cqPJVvC1qdbo",
+      "note": "fragSOL. Candidate for a mint with a LIVE hook program id, which is what finally exercises the upgrade-authority columns.",
+      "source": "handoff from a parallel investigation, re-verified here"
+    },
+    {
+      "address": "FRAGJ157KSDfGvBJtCSrsTWUqFnZhrw4aC8N8LqHuoos",
+      "note": "fragJTO. Same rationale.",
+      "source": "handoff from a parallel investigation, re-verified here"
+    },
+    {
+      "address": "FRAGB4KZGLMy3wH1nBajP3Q17MHnecEvTPT6wb4pX5MB",
+      "note": "fragBTC. Same rationale.",
+      "source": "handoff from a parallel investigation, re-verified here"
+    },
+    {
+      "address": "FRAG2gPNXozPpYcn2a8zK7YdtfNXCLsioZNwZXwTQ3cP",
+      "note": "FRAG squared. Same rationale.",
+      "source": "handoff from a parallel investigation, re-verified here"
+    },
+    {
+      "address": "FRAGW7L9BxkCMbivRN5HE2iXuA196v3fHA86GY16nV4L",
+      "note": "fragSWTCH. Same rationale.",
+      "source": "handoff from a parallel investigation, re-verified here"
+    },
+    {
+      "address": "stJUPZMmAWA1PNVPXCvqVK6MHABr4yFo5rv2JTethCa",
+      "note": "stJUP. Reported as the only mint in Jupiter's verified list carrying a non-null hook program id.",
+      "source": "handoff from a parallel investigation, re-verified here"
+    },
+    {
+      "address": "7RGwPnmoaqypagKnJNywkgo1FWvYMPerSMekLVNaSeHJ",
+      "note": "Percolator perp-position NFT.",
+      "source": "handoff from a parallel investigation, re-verified here"
+    },
+    {
+      "address": "AutxDYK4QARmFGCpQFQuet2kND3tzP5nZGRww9Tx8btp",
+      "note": "Percolator perp-position NFT.",
+      "source": "handoff from a parallel investigation, re-verified here"
+    },
+
+    {
+      "address": "gEGtLTPNQ7jcg25zTetkbmF7teoDLcrfTnQfmn2ondo",
+      "note": "NVDAon, Ondo Global Markets tokenized stock. Included so the current on-chain configuration of this family is measured rather than inferred from public descriptions.",
+      "source": "handoff from a parallel investigation, re-verified here"
+    }
+  ],
+
+  "candidateHookPrograms": [
+    {
+      "address": "fragnAis7Bp6FTsMoa6YcH8UffhEw43Ph79qAiK3iF3",
+      "note": "Fragmetric hook program. getProgramAccounts is permitted for ordinary custom programs on the public endpoint even though it is refused for Token-2022, so this can be enumerated directly.",
+      "source": "handoff from a parallel investigation, verified independently here"
+    },
+    {
+      "address": "wJUPXhGwC88LZeG1DXaYing3WB1Q4YvwJcK77bidNGv",
+      "note": "stJUP hook program.",
+      "source": "handoff from a parallel investigation, verified independently here"
+    },
+    {
+      "address": "FqhKJT9gtScjrmfUuRMjeg7cXNpif1fqsy5Jh65tJmTS",
+      "note": "Percolator hook program, guarding perp-position NFTs.",
+      "source": "handoff from a parallel investigation, verified independently here"
+    }
+  ],
+
+  "samplingRoots": [
+    {
+      "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "note": "The Token-2022 program itself. Sampling its transaction history surfaces mints in proportion to their share of recent Token-2022 traffic, which biases discovery toward actively-traded tokens and away from dormant ones.",
+      "source": "protocol"
+    }
+  ],
+
+  "excludeFromCandidates": [
+    "11111111111111111111111111111111",
+    "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+    "SysvarRent111111111111111111111111111111111",
+    "SysvarC1ock11111111111111111111111111111111",
+    "ComputeBudget111111111111111111111111111111",
+    "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+  ]
+}
