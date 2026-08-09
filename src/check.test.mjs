@@ -114,6 +114,40 @@ test('a dated snapshot says so on the confident path, not only when it misses', 
   assert.match(out, /Re-check with --live/);
 });
 
+/**
+ * The --live path had NO test at all, and that is how it shipped returning a
+ * strictly weaker answer than the dataset on the one fact that matters most to
+ * a holder — whether the hook program's code can be swapped. The dataset path
+ * printed "UPGRADEABLE — <authority> can replace its logic"; live mode left the
+ * field undefined so the line vanished, and an absent line reads as "nothing to
+ * report" rather than "not checked".
+ *
+ * This test needs the network, so it is opt-in: the rest of this suite is
+ * offline and the README says so, and quietly making it networked would trade
+ * one false claim for another. Run with CENSUS_LIVE_TESTS=1.
+ */
+const LIVE = process.env.CENSUS_LIVE_TESTS === '1';
+
+test('--live resolves upgradeability rather than going quiet', { skip: !LIVE && 'set CENSUS_LIVE_TESTS=1 (needs RPC)' }, () => {
+  const ds = run([LIVE_HOOK]).out;
+  const lv = run([LIVE_HOOK, '--live']).out;
+
+  // Both must SAY something about it. Never silence.
+  assert.match(ds, /hook program is\s+\S/);
+  assert.match(lv, /hook program is\s+\S/, '--live must not omit the line');
+
+  // And live must not be the weaker answer.
+  const auth = (ds.match(/UPGRADEABLE — (\S+)/) ?? [])[1];
+  assert.ok(auth, 'precondition: the dataset resolves an upgrade authority for this mint');
+  assert.match(lv, new RegExp(`UPGRADEABLE — ${auth}`), '--live disagreed with the dataset');
+});
+
+test('--live rejects a malformed address too', { skip: !LIVE && 'set CENSUS_LIVE_TESTS=1 (needs RPC)' }, () => {
+  const { code, out } = run(['not-a-mint-!!!', '--live']);
+  assert.notEqual(code, 0);
+  assert.doesNotMatch(out, /NOT MEASURED/);
+});
+
 test('no argument exits non-zero with usage', () => {
   const { code, out } = run([]);
   assert.equal(code, 2);
